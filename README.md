@@ -1,0 +1,2 @@
+# Rosethorn
+Discord bot 
