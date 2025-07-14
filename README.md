@@ -44,6 +44,7 @@ Edit `config.json` with your Discord bot credentials:
 - `clientId`: Your Discord application client ID  
 - `guildId`: The Discord server ID where commands will be deployed
 - `ticketCategoryId`: The category channel ID where tickets will be created (default: 1313028919997239297)
+- `adminRoles`: Array of role names that can claim/close tickets (e.g., ["Admin", "Moderator", "Staff"])
 
 ## Usage
 

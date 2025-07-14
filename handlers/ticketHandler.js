@@ -10,7 +10,7 @@ const {
     TextInputStyle,
     AttachmentBuilder
 } = require('discord.js');
-const { ticketCategoryId } = require('../config.json');
+const { ticketCategoryId, adminRoles = [] } = require('../config.json');
 const fs = require('fs');
 
 // Store ticket data
@@ -50,7 +50,7 @@ async function createTicket(interaction) {
     try {
         // Create ticket channel
         const ticketChannel = await guild.channels.create({
-            name: `🎟️-${user.username}-${ticketType}`,
+            name: `🎟️ | ${user.username}-${ticketType}`,
             type: ChannelType.GuildText,
             parent: ticketCategoryId,
             permissionOverwrites: [
@@ -119,7 +119,7 @@ async function createTicket(interaction) {
         
         // Send initial message with admin controls
         await ticketChannel.send({
-            content: `${user} Welcome to your support ticket!`,
+            content: `${user} Welcome to your support ticket!\n\n🔔 **Admin Staff** - Please assist this user.`,
             embeds: [initialEmbed],
             components: [adminRow]
         });
@@ -150,6 +150,14 @@ async function claimTicket(interaction) {
         });
     }
     
+    // Check if user has admin permissions
+    if (!isAdmin(interaction.member)) {
+        return await interaction.reply({
+            content: 'Only admin staff can claim tickets.',
+            ephemeral: true
+        });
+    }
+    
     if (ticket.claimedBy) {
         return await interaction.reply({
             content: `This ticket has already been claimed by <@${ticket.claimedBy}>.`,
@@ -173,6 +181,14 @@ async function claimTicket(interaction) {
 }
 
 async function showCloseModal(interaction) {
+    // Check if user has admin permissions
+    if (!isAdmin(interaction.member)) {
+        return await interaction.reply({
+            content: 'Only admin staff can close tickets.',
+            ephemeral: true
+        });
+    }
+    
     const modal = new ModalBuilder()
         .setCustomId('close_ticket_modal')
         .setTitle('Close Ticket');
@@ -295,6 +311,16 @@ async function generateTranscript(channel, ticket) {
     return new AttachmentBuilder(Buffer.from(transcript, 'utf-8'), {
         name: `ticket-${ticket.type}-${ticket.userId}-${Date.now()}.txt`
     });
+}
+
+function isAdmin(member) {
+    // Check if member has administrator permission
+    if (member.permissions.has(PermissionFlagsBits.Administrator)) {
+        return true;
+    }
+    
+    // Check if member has any of the configured admin roles
+    return member.roles.cache.some(role => adminRoles.includes(role.name));
 }
 
 function capitalizeFirst(str) {
