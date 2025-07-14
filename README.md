@@ -1,2 +1,2 @@
-# Rosethorn
+# Thorn
 Discord bot 
