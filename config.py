@@ -25,6 +25,10 @@ class Config:
     # Commands directory
     COMMANDS_DIR = 'commands'
     
+    # Onboarding system configuration
+    ONBOARDING_CHANNEL_ID = int(os.getenv('ONBOARDING_CHANNEL_ID', '1311529665348767835'))
+    ONBOARDING_ROLE_ID = int(os.getenv('ONBOARDING_ROLE_ID', '1308905911489921124'))
+    
     @classmethod
     def validate(cls):
         """Validate required configuration values."""
