@@ -1,0 +1,9 @@
+# Discord Bot Configuration
+# Copy this file to config.json and fill in your values
+
+{
+  "token": "YOUR_BOT_TOKEN_HERE",
+  "clientId": "YOUR_CLIENT_ID_HERE", 
+  "guildId": "YOUR_GUILD_ID_HERE",
+  "ticketCategoryId": "1313028919997239297"
+}
