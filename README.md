@@ -10,6 +10,7 @@ A modular Discord bot built with Python and discord.py, featuring dynamic comman
 - **Extensible Design**: Easy to add new commands with consistent structure
 - **Error Handling**: Comprehensive error handling and logging
 - **Configuration Management**: Environment-based configuration with `.env` support
+- **Member Onboarding**: Automated new member registration system with admin approval workflow
 
 ## 🚀 Quick Start
 
@@ -41,6 +42,10 @@ A modular Discord bot built with Python and discord.py, featuring dynamic comman
    COMMAND_PREFIX=!
    BOT_DESCRIPTION=Rosethorn - A modular Discord bot
    DEBUG=False
+   
+   # Onboarding system (optional)
+   ONBOARDING_CHANNEL_ID=1311529665348767835
+   ONBOARDING_ROLE_ID=1308905911489921124
    ```
 
 4. **Run the bot**
@@ -66,13 +71,22 @@ Rosethorn/
 └── README.md          # This file
 ```
 
-## 🛠️ Built-in Commands
+## 🛠️ Built-in Features
 
+### Commands
 | Command | Description | Aliases |
 |---------|-------------|---------|
 | `!ping` | Check bot latency and responsiveness | - |
 | `!help` | Show available commands | `h`, `commands` |
 | `!info` | Display bot and server information | `about`, `botinfo` |
+
+### Onboarding System
+- **Automatic Welcome**: Detects new members and sends welcome DMs with registration forms
+- **Data Collection**: Collects preferred name, gamertag, and birthday through interactive modals
+- **Admin Review**: Sends member information to designated admin channel with approval buttons
+- **Member Management**: Automatically sets nicknames and manages approval workflow
+
+See [ONBOARDING.md](ONBOARDING.md) for detailed documentation on the onboarding system.
 
 ## 🔧 Adding New Commands
 
