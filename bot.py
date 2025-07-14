@@ -67,6 +67,14 @@ class RosethornBot(commands.Bot):
         
         # Load all commands
         loaded_count = self.command_loader.load_all_commands()
+        
+        # Sync slash commands
+        try:
+            synced = await self.tree.sync()
+            logger.info(f"Synced {len(synced)} slash commands")
+        except Exception as e:
+            logger.error(f"Failed to sync slash commands: {e}")
+        
         logger.info(f"Bot setup complete. Loaded {loaded_count} commands.")
     
     async def on_ready(self):
