@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en" class="h-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}RosethornBot - Victorian Gothic Dashboard{% endblock %}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE2IDNDMTQuNSAzIDEzIDQgMTMgNi41VjEwQzEzIDEyLjUgMTQuNSAxNCAxNiAxNEMxNy41IDE0IDE5IDEyLjUgMTkgMTBWNi41QzE5IDQgMTcuNSAzIDE2IDNaIiBmaWxsPSIjNzExNDE3Ii8+CjxwYXRoIGQ9Ik0xNiAxNUMxMy4yIDE1IDExIDE3LjIgMTEgMjBWMjhDMTEgMjkuMSAxMS45IDMwIDEzIDMwSDE5QzIwLjEgMzAgMjEgMjkuMSAyMSAyOFYyMEMyMSAxNy4yIDE4LjggMTUgMTYgMTVaIiBmaWxsPSIjNzExNDE3Ii8+CjxwYXRoIGQ9Ik04IDE4QzYuNSAxOCA1IDE5LjUgNSAyMlYyNkM1IDI3LjUgNi41IDI5IDggMjlTMTEgMjcuNSAxMSAyNlYyMkMxMSAxOS41IDkuNSAxOCA4IDE4WiIgZmlsbD0iIzcxMTQxNyIvPgo8cGF0aCBkPSJNMjQgMThDMjIuNSAxOCAyMSAxOS41IDIxIDIyVjI2QzIxIDI3LjUgMjIuNSAyOSAyNCAyOVMyNyAyNy41IDI3IDI2VjIyQzI3IDE5LjUgMjUuNSAxOCAyNCAxOFoiIGZpbGw9IiM3MTE0MTciLz4KPC9zdmc+">
+    
+    <!-- Victorian Gothic CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/victorian-gothic.css') }}">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- Custom fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    {% block head %}{% endblock %}
+</head>
+<body class="d-flex flex-column h-100">
+    <!-- Page Loader -->
+    <div id="page-loader" class="loading-overlay" style="display: none;">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <div class="loading-message">Loading...</div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand gothic-title" href="{{ url_for('dashboard.index') }}">
+                🌹 RosethornBot
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'dashboard.index' %}active{% endif %}" 
+                           href="{{ url_for('dashboard.index') }}">
+                            <i class="bi bi-house-door"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'dashboard.commands' %}active{% endif %}" 
+                           href="{{ url_for('dashboard.commands') }}">
+                            <i class="bi bi-terminal"></i> Commands
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'dashboard.tickets' %}active{% endif %}" 
+                           href="{{ url_for('dashboard.tickets') }}">
+                            <i class="bi bi-ticket-perforated"></i> Tickets
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'dashboard.economy' %}active{% endif %}" 
+                           href="{{ url_for('dashboard.economy') }}">
+                            <i class="bi bi-coin"></i> Economy
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'dashboard.settings' %}active{% endif %}" 
+                           href="{{ url_for('dashboard.settings') }}">
+                            <i class="bi bi-gear"></i> Settings
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+                
+                <ul class="navbar-nav">
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            {% if current_user.avatar %}
+                                <img src="https://cdn.discordapp.com/avatars/{{ current_user.discord_id }}/{{ current_user.avatar }}.png?size=32" 
+                                     class="rounded-circle me-2" width="24" height="24" alt="Avatar">
+                            {% else %}
+                                <i class="bi bi-person-circle me-2"></i>
+                            {% endif %}
+                            {{ current_user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{{ url_for('dashboard.logout') }}">
+                                <i class="bi bi-box-arrow-right"></i> Logout
+                            </a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard.login') }}">
+                            <i class="bi bi-box-arrow-in-right"></i> Login
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="container mt-3">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        {% if category == 'success' %}
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                        {% elif category == 'error' %}
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        {% elif category == 'warning' %}
+                            <i class="bi bi-exclamation-circle-fill me-2"></i>
+                        {% else %}
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                        {% endif %}
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main class="flex-grow-1 py-4">
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto py-3">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="mb-0 text-muted">
+                        🌹 RosethornBot - Victorian Gothic Discord Management
+                    </p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <p class="mb-0 text-muted">
+                        Crafted with thorns and roses | 
+                        <a href="https://discord.gg/rosethorn" class="text-decoration-none" target="_blank">
+                            <i class="bi bi-discord"></i> Discord Server
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Notifications Container -->
+    <div id="notifications" class="notifications-container"></div>
+
+    <!-- Auto-save Indicator -->
+    <div id="auto-save-indicator" class="auto-save-indicator">
+        <i class="bi bi-check-circle-fill"></i> Auto-saved
+    </div>
+
+    <!-- Bootstrap Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Dashboard JavaScript -->
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    
+    {% block scripts %}{% endblock %}
+
+    <!-- Additional CSS for components not in main file -->
+    <style>
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(26, 26, 26, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .loading-content {
+            text-align: center;
+            color: var(--text-light);
+        }
+
+        .loading-message {
+            margin-top: 1rem;
+            font-family: 'Cinzel', serif;
+            font-size: 1.1rem;
+        }
+
+        /* Notifications */
+        .notifications-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+            max-width: 400px;
+        }
+
+        .notification {
+            background: var(--dark-bg);
+            border: 2px solid;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-ornate);
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .notification-success {
+            border-color: var(--success);
+        }
+
+        .notification-error {
+            border-color: var(--error);
+        }
+
+        .notification-warning {
+            border-color: var(--warning);
+        }
+
+        .notification-info {
+            border-color: var(--primary-red);
+        }
+
+        .notification-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+        }
+
+        .notification-message {
+            color: var(--text-light);
+            flex-grow: 1;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-left: 1rem;
+            padding: 0;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notification-close:hover {
+            color: var(--text-light);
+        }
+
+        /* Auto-save Indicator */
+        .auto-save-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--success);
+            color: var(--text-light);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+            font-size: 0.9rem;
+        }
+
+        /* Navbar Dropdown */
+        .dropdown-menu {
+            background: var(--dark-bg);
+            border: 2px solid var(--primary-red);
+            border-radius: 8px;
+            box-shadow: var(--shadow-ornate);
+        }
+
+        .dropdown-item {
+            color: var(--text-light);
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(113, 20, 23, 0.2);
+            color: var(--accent-gold);
+        }
+
+        /* Navbar Toggler */
+        .navbar-toggler {
+            border: 1px solid var(--primary-red);
+            padding: 0.25rem 0.5rem;
+        }
+
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%23711417' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+
+        /* Footer */
+        .footer {
+            background: linear-gradient(135deg, var(--darker-bg) 0%, var(--dark-bg) 100%);
+            border-top: 2px solid var(--primary-red);
+            margin-top: auto;
+        }
+
+        .footer a {
+            color: var(--primary-red);
+            transition: color 0.3s ease;
+        }
+
+        .footer a:hover {
+            color: var(--accent-gold);
+        }
+
+        /* Field Error Styling */
+        .field-error {
+            color: var(--error);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: block;
+        }
+
+        .form-control.error {
+            border-color: var(--error);
+            box-shadow: 0 0 10px rgba(139, 21, 56, 0.3);
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .notifications-container {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
+            }
+
+            .notification {
+                margin-bottom: 5px;
+            }
+
+            .auto-save-indicator {
+                bottom: 10px;
+                right: 10px;
+                left: 10px;
+                text-align: center;
+            }
+
+            .navbar-nav {
+                margin-top: 1rem;
+            }
+
+            .navbar-nav .nav-link {
+                padding: 0.75rem 0 !important;
+                border-bottom: 1px solid rgba(113, 20, 23, 0.2);
+            }
+
+            .navbar-nav .nav-link:last-child {
+                border-bottom: none;
+            }
+        }
+    </style>
+</body>
+</html>

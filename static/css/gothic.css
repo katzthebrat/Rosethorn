@@ -1,0 +1,480 @@
+/* Victorian Gothic CSS Theme */
+:root {
+    --primary-red: #711417;
+    --dark-red: #5a0f12;
+    --light-red: #8b1a1f;
+    --gothic-black: #1a1a1a;
+    --dark-grey: #2d2d2d;
+    --light-grey: #4a4a4a;
+    --gold: #d4af37;
+    --cream: #f5f5dc;
+    --shadow: rgba(0, 0, 0, 0.8);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Cinzel', 'Times New Roman', serif;
+    background: linear-gradient(135deg, var(--gothic-black) 0%, var(--dark-grey) 100%);
+    color: var(--cream);
+    line-height: 1.6;
+    min-height: 100vh;
+    background-attachment: fixed;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Cinzel Decorative', 'Times New Roman', serif;
+    color: var(--primary-red);
+    text-shadow: 2px 2px 4px var(--shadow);
+    margin-bottom: 1rem;
+}
+
+h1 {
+    font-size: 3rem;
+    text-align: center;
+    border-bottom: 2px solid var(--primary-red);
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+}
+
+/* Navigation */
+.navbar {
+    background: linear-gradient(90deg, var(--gothic-black) 0%, var(--primary-red) 50%, var(--gothic-black) 100%);
+    padding: 1rem 0;
+    box-shadow: 0 4px 8px var(--shadow);
+    border-bottom: 3px solid var(--gold);
+}
+
+.navbar-brand {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 2rem;
+    color: var(--gold) !important;
+    text-shadow: 2px 2px 4px var(--shadow);
+}
+
+.nav-link {
+    color: var(--cream) !important;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.nav-link:hover {
+    color: var(--gold) !important;
+    text-shadow: 1px 1px 2px var(--shadow);
+    transform: translateY(-2px);
+}
+
+/* Main Container */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* Cards */
+.card {
+    background: linear-gradient(145deg, var(--dark-grey) 0%, var(--gothic-black) 100%);
+    border: 2px solid var(--primary-red);
+    border-radius: 15px;
+    box-shadow: 0 8px 16px var(--shadow);
+    margin-bottom: 2rem;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px var(--shadow);
+    border-color: var(--gold);
+}
+
+.card-header {
+    background: linear-gradient(90deg, var(--primary-red) 0%, var(--dark-red) 100%);
+    color: var(--gold);
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1.5rem;
+    padding: 1rem;
+    text-align: center;
+    text-shadow: 2px 2px 4px var(--shadow);
+    border-bottom: 2px solid var(--gold);
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+/* Buttons */
+.btn {
+    font-family: 'Cinzel', serif;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 0.75rem 2rem;
+    border-radius: 25px;
+    border: 2px solid;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, var(--primary-red) 0%, var(--light-red) 100%);
+    border-color: var(--primary-red);
+    color: var(--cream);
+    box-shadow: 0 4px 8px var(--shadow);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(45deg, var(--light-red) 0%, var(--primary-red) 100%);
+    border-color: var(--gold);
+    color: var(--gold);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px var(--shadow);
+}
+
+.btn-success {
+    background: linear-gradient(45deg, #2d5a3d 0%, #4a7c59 100%);
+    border-color: #2d5a3d;
+    color: var(--cream);
+}
+
+.btn-danger {
+    background: linear-gradient(45deg, #8b0000 0%, #a52a2a 100%);
+    border-color: #8b0000;
+    color: var(--cream);
+}
+
+.btn-warning {
+    background: linear-gradient(45deg, var(--gold) 0%, #b8860b 100%);
+    border-color: var(--gold);
+    color: var(--gothic-black);
+}
+
+/* Forms */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    color: var(--gold);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.form-control {
+    background: var(--dark-grey);
+    border: 2px solid var(--light-grey);
+    border-radius: 10px;
+    color: var(--cream);
+    padding: 0.75rem 1rem;
+    font-family: 'Cinzel', serif;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    background: var(--gothic-black);
+    border-color: var(--primary-red);
+    box-shadow: 0 0 10px rgba(113, 20, 23, 0.5);
+    color: var(--cream);
+}
+
+.form-control::placeholder {
+    color: var(--light-grey);
+    font-style: italic;
+}
+
+/* Tables */
+.table {
+    background: var(--dark-grey);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px var(--shadow);
+}
+
+.table thead {
+    background: linear-gradient(90deg, var(--primary-red) 0%, var(--dark-red) 100%);
+}
+
+.table thead th {
+    color: var(--gold);
+    font-family: 'Cinzel Decorative', serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: none;
+    padding: 1rem;
+}
+
+.table tbody tr {
+    background: var(--dark-grey);
+    transition: all 0.3s ease;
+}
+
+.table tbody tr:hover {
+    background: var(--light-grey);
+    transform: scale(1.02);
+}
+
+.table tbody td {
+    color: var(--cream);
+    border-color: var(--light-grey);
+    padding: 1rem;
+    vertical-align: middle;
+}
+
+/* Gothic Decorations */
+.gothic-border {
+    border: 3px solid var(--primary-red);
+    border-radius: 15px;
+    position: relative;
+    padding: 2rem;
+    background: linear-gradient(145deg, var(--dark-grey) 0%, var(--gothic-black) 100%);
+}
+
+.gothic-border::before,
+.gothic-border::after {
+    content: '🌹';
+    position: absolute;
+    font-size: 1.5rem;
+    color: var(--primary-red);
+    text-shadow: 2px 2px 4px var(--shadow);
+}
+
+.gothic-border::before {
+    top: -10px;
+    left: 20px;
+}
+
+.gothic-border::after {
+    bottom: -10px;
+    right: 20px;
+}
+
+/* Dashboard Stats */
+.stats-card {
+    background: linear-gradient(135deg, var(--primary-red) 0%, var(--dark-red) 100%);
+    color: var(--gold);
+    text-align: center;
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 8px 16px var(--shadow);
+    transition: all 0.3s ease;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px) scale(1.05);
+}
+
+.stats-number {
+    font-size: 3rem;
+    font-family: 'Cinzel Decorative', serif;
+    text-shadow: 2px 2px 4px var(--shadow);
+}
+
+.stats-label {
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-top: 0.5rem;
+}
+
+/* Command Editor */
+.command-editor {
+    background: var(--gothic-black);
+    border: 2px solid var(--primary-red);
+    border-radius: 10px;
+    padding: 1rem;
+    font-family: 'Courier New', monospace;
+    color: var(--cream);
+    min-height: 200px;
+    resize: vertical;
+}
+
+.syntax-highlight {
+    background: var(--dark-grey);
+    border-left: 4px solid var(--primary-red);
+    padding: 1rem;
+    border-radius: 5px;
+    font-family: 'Courier New', monospace;
+    color: var(--cream);
+    overflow-x: auto;
+}
+
+/* Embed Preview */
+.embed-preview {
+    background: #2f3136;
+    border-left: 4px solid var(--primary-red);
+    border-radius: 5px;
+    padding: 1rem;
+    margin: 1rem 0;
+    font-family: 'Whitney', 'Helvetica Neue', sans-serif;
+}
+
+.embed-title {
+    color: #ffffff;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.embed-description {
+    color: #dcddde;
+    margin-bottom: 1rem;
+    line-height: 1.4;
+}
+
+.embed-field {
+    margin-bottom: 1rem;
+}
+
+.embed-field.inline {
+    display: inline-block;
+    width: 30%;
+    margin-right: 3%;
+    vertical-align: top;
+}
+
+.field-name {
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.field-value {
+    color: #dcddde;
+    font-size: 0.9rem;
+    line-height: 1.3;
+}
+
+.embed-footer {
+    color: #72767d;
+    font-size: 0.8rem;
+    margin-top: 1rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid #4f545c;
+}
+
+.embed-thumbnail {
+    float: right;
+    max-width: 80px;
+    max-height: 80px;
+    border-radius: 5px;
+    margin-left: 1rem;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes gothic-glow {
+    0%, 100% { box-shadow: 0 0 5px var(--primary-red); }
+    50% { box-shadow: 0 0 20px var(--primary-red), 0 0 30px var(--primary-red); }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-out;
+}
+
+.gothic-glow {
+    animation: gothic-glow 2s ease-in-out infinite;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+    
+    h1 {
+        font-size: 2rem;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .embed-field.inline {
+        display: block;
+        width: 100%;
+        margin-right: 0;
+    }
+}
+
+/* Dark Scrollbar */
+::-webkit-scrollbar {
+    width: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--gothic-black);
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--primary-red) 0%, var(--dark-red) 100%);
+    border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, var(--light-red) 0%, var(--primary-red) 100%);
+}
+
+/* Gothic Loading Spinner */
+.gothic-spinner {
+    border: 3px solid var(--light-grey);
+    border-top: 3px solid var(--primary-red);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 2rem auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Success/Error Messages */
+.alert {
+    padding: 1rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    border-left: 4px solid;
+    font-weight: 500;
+}
+
+.alert-success {
+    background: rgba(45, 90, 61, 0.2);
+    border-color: #2d5a3d;
+    color: #4a7c59;
+}
+
+.alert-error {
+    background: rgba(139, 0, 0, 0.2);
+    border-color: #8b0000;
+    color: #ff6b6b;
+}
+
+.alert-warning {
+    background: rgba(212, 175, 55, 0.2);
+    border-color: var(--gold);
+    color: var(--gold);
+}

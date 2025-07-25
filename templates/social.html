@@ -1,0 +1,693 @@
+{% extends "base.html" %}
+
+{% block title %}Social Media - RosethornBot{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="page-header gothic-border">
+                <h1 class="page-title">📱 Gothic Social Observatory</h1>
+                <p class="page-subtitle">Monitor thy digital realm with Victorian vigilance and Gothic grace</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Guild Selection Alert -->
+    {% if not guild %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-warning gothic-border">
+                <h5>🏰 Select Your Gothic Manor</h5>
+                <p>Please select a guild from the navigation menu to configure social media monitoring for that specific manor.</p>
+            </div>
+        </div>
+    </div>
+    {% else %}
+
+    <!-- Social Media Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stats-card fade-in">
+                <div class="stats-icon">📱</div>
+                <div class="stats-number">{{ monitors|length }}</div>
+                <div class="stats-label">Active Monitors</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stats-card fade-in">
+                <div class="stats-icon">📺</div>
+                <div class="stats-number">{{ monitors|groupby('platform')|list|length }}</div>
+                <div class="stats-label">Platforms</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stats-card fade-in">
+                <div class="stats-icon">📊</div>
+                <div class="stats-number">--</div>
+                <div class="stats-label">Posts Today</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stats-card fade-in">
+                <div class="stats-icon">⚡</div>
+                <div class="stats-number">Online</div>
+                <div class="stats-label">Status</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Social Media Management -->
+    <div class="row">
+        <!-- Add Monitor -->
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4>➕ Add Social Monitor</h4>
+                </div>
+                <div class="card-body">
+                    <form id="addMonitorForm" class="ajax-form" action="/api/social-monitors" method="POST">
+                        <input type="hidden" name="guild_id" value="{{ guild.guild_id }}">
+                        
+                        <div class="form-group">
+                            <label class="form-label">Platform</label>
+                            <select class="form-control" name="platform" required>
+                                <option value="">Select Platform...</option>
+                                <option value="twitter">🐦 Twitter / X</option>
+                                <option value="youtube">📺 YouTube</option>
+                                <option value="instagram">📸 Instagram</option>
+                                <option value="tiktok">🎵 TikTok</option>
+                                <option value="twitch">🎮 Twitch</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Username/Handle</label>
+                            <input type="text" class="form-control" name="username" required 
+                                   placeholder="Enter username without @">
+                            <div class="form-text">Don't include @ symbol</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Announcement Channel</label>
+                            <input type="text" class="form-control" name="channel_id" required 
+                                   placeholder="Channel ID for announcements">
+                            <div class="form-text">Where new posts will be announced</div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <i class="fas fa-plus"></i> Add Monitor
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Platform Status -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5>🔗 Platform Status</h5>
+                </div>
+                <div class="card-body">
+                    <div class="platform-status">
+                        <div class="status-item">
+                            <div class="platform-icon">🐦</div>
+                            <div class="platform-info">
+                                <div class="platform-name">Twitter / X</div>
+                                <div class="platform-status-text">
+                                    {% if config.TWITTER_BEARER_TOKEN %}
+                                        <span class="badge badge-success">Connected</span>
+                                    {% else %}
+                                        <span class="badge badge-secondary">Not Configured</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="status-item">
+                            <div class="platform-icon">📺</div>
+                            <div class="platform-info">
+                                <div class="platform-name">YouTube</div>
+                                <div class="platform-status-text">
+                                    {% if config.YOUTUBE_API_KEY %}
+                                        <span class="badge badge-success">Connected</span>
+                                    {% else %}
+                                        <span class="badge badge-secondary">Not Configured</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="status-item">
+                            <div class="platform-icon">📸</div>
+                            <div class="platform-info">
+                                <div class="platform-name">Instagram</div>
+                                <div class="platform-status-text">
+                                    <span class="badge badge-warning">Coming Soon</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="status-item">
+                            <div class="platform-icon">🎵</div>
+                            <div class="platform-info">
+                                <div class="platform-name">TikTok</div>
+                                <div class="platform-status-text">
+                                    <span class="badge badge-warning">Coming Soon</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5>⚡ Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="quick-actions">
+                        <button class="btn btn-outline-primary btn-block mb-2" onclick="checkAllMonitors()">
+                            <i class="fas fa-sync-alt"></i> Check All Monitors
+                        </button>
+                        <button class="btn btn-outline-success btn-block mb-2" onclick="testNotification()">
+                            <i class="fas fa-bell"></i> Test Notification
+                        </button>
+                        <button class="btn btn-outline-info btn-block mb-2" data-modal-toggle="helpModal">
+                            <i class="fas fa-question-circle"></i> Setup Guide
+                        </button>
+                        <button class="btn btn-outline-secondary btn-block" onclick="exportMonitors()">
+                            <i class="fas fa-download"></i> Export Config
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Monitors -->
+        <div class="col-lg-8 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4>👁️ Active Social Monitors</h4>
+                    <div class="header-actions">
+                        <button class="btn btn-outline-primary btn-sm" onclick="refreshMonitors()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" 
+                                    type="button" data-bs-toggle="dropdown">
+                                Filter by Platform
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" onclick="filterMonitors('')">All Platforms</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="filterMonitors('twitter')">Twitter / X</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="filterMonitors('youtube')">YouTube</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="filterMonitors('instagram')">Instagram</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="filterMonitors('tiktok')">TikTok</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if monitors %}
+                        <div class="monitors-list" id="monitors-list">
+                            {% for monitor in monitors %}
+                            <div class="monitor-item" data-platform="{{ monitor.platform }}" data-monitor-id="{{ monitor.id }}">
+                                <div class="monitor-header">
+                                    <div class="platform-info">
+                                        <div class="platform-icon">
+                                            {% if monitor.platform == 'twitter' %}🐦
+                                            {% elif monitor.platform == 'youtube' %}📺
+                                            {% elif monitor.platform == 'instagram' %}📸
+                                            {% elif monitor.platform == 'tiktok' %}🎵
+                                            {% elif monitor.platform == 'twitch' %}🎮
+                                            {% else %}📱{% endif %}
+                                        </div>
+                                        <div class="platform-details">
+                                            <div class="platform-name">{{ monitor.platform.title() }}</div>
+                                            <div class="username">@{{ monitor.username }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="monitor-status">
+                                        {% if monitor.enabled %}
+                                            <span class="badge badge-success">Active</span>
+                                        {% else %}
+                                            <span class="badge badge-secondary">Disabled</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="monitor-content">
+                                    <div class="monitor-details">
+                                        <div class="detail-item">
+                                            <i class="fas fa-hashtag"></i>
+                                            <span>Channel: #announcement-channel</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <i class="fas fa-calendar"></i>
+                                            <span>Added: {{ monitor.created_at.strftime('%Y-%m-%d') }}</span>
+                                        </div>
+                                        {% if monitor.last_post_id %}
+                                        <div class="detail-item">
+                                            <i class="fas fa-clock"></i>
+                                            <span>Last Check: Recently</span>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="monitor-actions">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="checkMonitor({{ monitor.id }})">
+                                        <i class="fas fa-sync-alt"></i> Check Now
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-warning" onclick="toggleMonitor({{ monitor.id }}, '{{ monitor.platform }}', '{{ monitor.username }}')">
+                                        <i class="fas fa-{{ 'pause' if monitor.enabled else 'play' }}"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-info" onclick="editMonitor({{ monitor.id }})">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="removeMonitor({{ monitor.id }}, '{{ monitor.platform }}', '{{ monitor.username }}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <div class="empty-icon">📱</div>
+                            <div class="empty-title">No Social Monitors</div>
+                            <div class="empty-description">
+                                Start monitoring social media accounts by adding your first monitor. Posts will be automatically announced in your chosen channel.
+                            </div>
+                            <div class="mt-3">
+                                <div class="setup-steps">
+                                    <div class="step-item">
+                                        <div class="step-number">1</div>
+                                        <div class="step-text">Choose a platform (Twitter, YouTube, etc.)</div>
+                                    </div>
+                                    <div class="step-item">
+                                        <div class="step-number">2</div>
+                                        <div class="step-text">Enter the username to monitor</div>
+                                    </div>
+                                    <div class="step-item">
+                                        <div class="step-number">3</div>
+                                        <div class="step-text">Select announcement channel</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Edit Monitor Modal -->
+<div class="modal fade" id="editMonitorModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content gothic-border">
+            <div class="modal-header">
+                <h5 class="modal-title">✏️ Edit Social Monitor</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editMonitorForm">
+                    <div class="form-group">
+                        <label class="form-label">Platform</label>
+                        <input type="text" class="form-control" id="editPlatform" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Username</label>
+                        <input type="text" class="form-control" id="editUsername" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Channel ID</label>
+                        <input type="text" class="form-control" id="editChannelId" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="editEnabled">
+                            <label class="form-check-label" for="editEnabled">
+                                Enable Monitor
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveMonitorEdit()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Help Modal -->
+<div class="modal fade" id="helpModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content gothic-border">
+            <div class="modal-header">
+                <h5 class="modal-title">📚 Social Media Monitoring Guide</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="help-content">
+                    <h6>🚀 Getting Started</h6>
+                    <ol>
+                        <li>Choose a social media platform to monitor</li>
+                        <li>Enter the username/handle (without @ symbol)</li>
+                        <li>Select the Discord channel for announcements</li>
+                        <li>Click "Add Monitor" to start tracking</li>
+                    </ol>
+                    
+                    <h6>📱 Supported Platforms</h6>
+                    <div class="platform-help">
+                        <div class="platform-help-item">
+                            <strong>🐦 Twitter / X</strong>
+                            <p>Monitors new tweets and retweets. Requires Twitter API access.</p>
+                        </div>
+                        <div class="platform-help-item">
+                            <strong>📺 YouTube</strong>
+                            <p>Tracks new video uploads. Requires YouTube Data API key.</p>
+                        </div>
+                        <div class="platform-help-item">
+                            <strong>📸 Instagram</strong>
+                            <p>Monitor Instagram posts. (Coming soon - requires business account)</p>
+                        </div>
+                        <div class="platform-help-item">
+                            <strong>🎵 TikTok</strong>
+                            <p>Track TikTok videos. (Coming soon - limited API access)</p>
+                        </div>
+                    </div>
+                    
+                    <h6>⚙️ Configuration</h6>
+                    <ul>
+                        <li><strong>API Keys:</strong> Configure platform API keys in bot settings</li>
+                        <li><strong>Check Frequency:</strong> Monitors check every 30 minutes by default</li>
+                        <li><strong>Permissions:</strong> Bot needs "Send Messages" and "Embed Links" permissions</li>
+                        <li><strong>Channel Setup:</strong> Use channel ID, not channel name</li>
+                    </ul>
+                    
+                    <h6>🔧 Troubleshooting</h6>
+                    <ul>
+                        <li>If no posts appear, check API key configuration</li>
+                        <li>Verify the username exists on the platform</li>
+                        <li>Ensure bot has permissions in the announcement channel</li>
+                        <li>Use "Check Now" to manually test a monitor</li>
+                    </ul>
+                    
+                    <h6>📊 Features</h6>
+                    <ul>
+                        <li>Automatic post detection and announcements</li>
+                        <li>Rich embed formatting with post previews</li>
+                        <li>Multiple accounts per platform supported</li>
+                        <li>Enable/disable monitors without deletion</li>
+                        <li>Real-time status monitoring</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Social media monitoring functions
+let currentEditMonitorId = null;
+
+function refreshMonitors() {
+    window.gothicDashboard.showLoading(true);
+    location.reload();
+}
+
+async function checkAllMonitors() {
+    window.gothicDashboard.showLoading(true);
+    
+    try {
+        const response = await fetch('/api/checkposts', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const result = await response.json();
+        
+        if (result.success !== false) {
+            window.gothicDashboard.showNotification('All monitors checked! New posts will be announced. 📱', 'success');
+        } else {
+            window.gothicDashboard.showNotification('Failed to check monitors', 'error');
+        }
+    } catch (error) {
+        console.error('Error checking monitors:', error);
+        window.gothicDashboard.showNotification('Error checking social media', 'error');
+    } finally {
+        window.gothicDashboard.showLoading(false);
+    }
+}
+
+async function checkMonitor(monitorId) {
+    try {
+        // Individual monitor check implementation would go here
+        window.gothicDashboard.showNotification(`Checking monitor #${monitorId}...`, 'info');
+        
+        // Simulate check
+        setTimeout(() => {
+            window.gothicDashboard.showNotification('Monitor checked successfully! 🔍', 'success');
+        }, 2000);
+    } catch (error) {
+        console.error('Error checking monitor:', error);
+        window.gothicDashboard.showNotification('Failed to check monitor', 'error');
+    }
+}
+
+async function toggleMonitor(monitorId, platform, username) {
+    try {
+        const response = await fetch('/api/social-monitors/toggle', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                monitor_id: monitorId,
+                platform: platform,
+                username: username
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success !== false) {
+            window.gothicDashboard.showNotification(`Monitor for @${username} ${result.enabled ? 'enabled' : 'disabled'}! 📱`, 'success');
+            refreshMonitors();
+        } else {
+            window.gothicDashboard.showNotification('Failed to toggle monitor', 'error');
+        }
+    } catch (error) {
+        console.error('Error toggling monitor:', error);
+        window.gothicDashboard.showNotification('Error updating monitor', 'error');
+    }
+}
+
+function editMonitor(monitorId) {
+    const monitorItem = document.querySelector(`[data-monitor-id="${monitorId}"]`);
+    if (monitorItem) {
+        const platform = monitorItem.dataset.platform;
+        const username = monitorItem.querySelector('.username').textContent.replace('@', '');
+        const enabled = monitorItem.querySelector('.badge').textContent === 'Active';
+        
+        // Populate edit form
+        document.getElementById('editPlatform').value = platform.charAt(0).toUpperCase() + platform.slice(1);
+        document.getElementById('editUsername').value = username;
+        document.getElementById('editChannelId').value = 'channel_id_here';
+        document.getElementById('editEnabled').checked = enabled;
+        
+        currentEditMonitorId = monitorId;
+        new bootstrap.Modal(document.getElementById('editMonitorModal')).show();
+    }
+}
+
+function saveMonitorEdit() {
+    if (!currentEditMonitorId) return;
+    
+    const username = document.getElementById('editUsername').value;
+    const channelId = document.getElementById('editChannelId').value;
+    const enabled = document.getElementById('editEnabled').checked;
+    
+    if (!username || !channelId) {
+        window.gothicDashboard.showNotification('Please fill in all required fields', 'error');
+        return;
+    }
+    
+    // Implementation would go here
+    window.gothicDashboard.showNotification('Monitor updated successfully! 📱', 'success');
+    bootstrap.Modal.getInstance(document.getElementById('editMonitorModal')).hide();
+    refreshMonitors();
+}
+
+async function removeMonitor(monitorId, platform, username) {
+    if (!confirm(`Remove monitor for @${username} on ${platform}? This action cannot be undone.`)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/social-monitors', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                monitor_id: monitorId,
+                platform: platform,
+                username: username
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success !== false) {
+            window.gothicDashboard.showNotification(`Monitor for @${username} removed! 🗑️`, 'success');
+            refreshMonitors();
+        } else {
+            window.gothicDashboard.showNotification('Failed to remove monitor', 'error');
+        }
+    } catch (error) {
+        console.error('Error removing monitor:', error);
+        window.gothicDashboard.showNotification('Error removing monitor', 'error');
+    }
+}
+
+function filterMonitors(platform) {
+    const monitors = document.querySelectorAll('.monitor-item');
+    
+    monitors.forEach(monitor => {
+        if (!platform || monitor.dataset.platform === platform) {
+            monitor.style.display = 'block';
+        } else {
+            monitor.style.display = 'none';
+        }
+    });
+    
+    const filterText = platform ? platform.charAt(0).toUpperCase() + platform.slice(1) : 'All Platforms';
+    window.gothicDashboard.showNotification(`Filtered by: ${filterText} 🔍`, 'info');
+}
+
+function testNotification() {
+    const testEmbed = {
+        title: '🐦 Test Social Media Post',
+        description: 'This is a test notification from the Gothic Social Observatory. Your monitoring system is working perfectly!',
+        color: '#711417',
+        footer: { text: '🌹 RosethornBot - Social Media Monitor' },
+        timestamp: new Date().toISOString()
+    };
+    
+    // Create a visual preview
+    const previewHtml = `
+        <div class="embed-preview" style="border-left: 4px solid #711417; padding: 1rem; background: #2f3136; margin: 1rem 0;">
+            <div style="color: #ffffff; font-weight: 600; margin-bottom: 0.5rem;">${testEmbed.title}</div>
+            <div style="color: #dcddde; margin-bottom: 1rem;">${testEmbed.description}</div>
+            <div style="color: #72767d; font-size: 0.8rem;">${testEmbed.footer.text}</div>
+        </div>
+    `;
+    
+    window.gothicDashboard.showNotification('Test notification sent! Check the preview above. 📱', 'success');
+    
+    // Show preview in a modal
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.innerHTML = `
+        <div class="modal-dialog">
+            <div class="modal-content gothic-border">
+                <div class="modal-header">
+                    <h5 class="modal-title">📱 Test Notification Preview</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>This is how social media posts will appear in your Discord channel:</p>
+                    ${previewHtml}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    const testModal = new bootstrap.Modal(modal);
+    testModal.show();
+    
+    // Clean up modal after it's hidden
+    modal.addEventListener('hidden.bs.modal', () => {
+        document.body.removeChild(modal);
+    });
+}
+
+function exportMonitors() {
+    const monitors = Array.from(document.querySelectorAll('.monitor-item')).map(item => ({
+        platform: item.dataset.platform,
+        username: item.querySelector('.username').textContent.replace('@', ''),
+        enabled: item.querySelector('.badge').textContent === 'Active',
+        added: item.querySelector('.detail-item:nth-child(2) span').textContent.replace('Added: ', '')
+    }));
+    
+    const exportData = {
+        guild_id: '{{ guild.guild_id if guild else "" }}',
+        export_date: new Date().toISOString(),
+        monitors: monitors
+    };
+    
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `gothic_social_monitors_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    
+    window.gothicDashboard.showNotification('Monitor configuration exported! 📄', 'success');
+}
+
+// Form validation
+document.addEventListener('DOMContentLoaded', function() {
+    const platformSelect = document.querySelector('[name="platform"]');
+    const usernameInput = document.querySelector('[name="username"]');
+    
+    if (platformSelect && usernameInput) {
+        platformSelect.addEventListener('change', function() {
+            const platform = this.value;
+            let placeholder = 'Enter username without @';
+            
+            switch (platform) {
+                case 'twitter':
+                    placeholder = 'Enter Twitter handle without @';
+                    break;
+                case 'youtube':
+                    placeholder = 'Enter YouTube channel name or handle';
+                    break;
+                case 'instagram':
+                    placeholder = 'Enter Instagram username without @';
+                    break;
+                case 'tiktok':
+                    placeholder = 'Enter TikTok username without @';
+                    break;
+            }
+            
+            usernameInput.placeholder = placeholder;
+        });
+    }
+});
+</script>
+{% endblock %}

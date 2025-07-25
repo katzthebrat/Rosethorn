@@ -1,0 +1,641 @@
+{% extends "base.html" %}
+
+{% block title %}Tickets - RosethornBot{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="page-header gothic-border">
+                <h1 class="page-title">🎫 Gothic Support Chambers</h1>
+                <p class="page-subtitle">Manage support requests with Victorian hospitality and Gothic efficiency</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Guild Selection Alert -->
+    {% if not guild %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-warning gothic-border">
+                <h5>🏰 Select Your Gothic Manor</h5>
+                <p>Please select a guild from the navigation menu to view tickets for that specific manor.</p>
+            </div>
+        </div>
+    </div>
+    {% else %}
+
+    <!-- Ticket Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stats-card fade-in">
+                <div class="stats-icon">🎫</div>
+                <div class="stats-number">{{ tickets|selectattr("status", "equalto", "open")|list|length }}</div>
+                <div class="stats-label">Open Tickets</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stats-card fade-in">
+                <div class="stats-icon">✅</div>
+                <div class="stats-number">{{ tickets|selectattr("status", "equalto", "closed")|list|length }}</div>
+                <div class="stats-label">Closed Tickets</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stats-card fade-in">
+                <div class="stats-icon">📊</div>
+                <div class="stats-number">{{ tickets|length }}</div>
+                <div class="stats-label">Total Tickets</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stats-card fade-in">
+                <div class="stats-icon">⏱️</div>
+                <div class="stats-number">--</div>
+                <div class="stats-label">Avg. Response</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ticket Management -->
+    <div class="row">
+        <!-- Filters and Search -->
+        <div class="col-lg-3 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4>🔍 Ticket Filters</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Search -->
+                    <div class="form-group mb-3">
+                        <label class="form-label">Search Tickets</label>
+                        <input type="text" class="form-control search-input" 
+                               data-search-type="tickets" 
+                               placeholder="🔍 Search by ID, subject...">
+                    </div>
+                    
+                    <!-- Status Filter -->
+                    <div class="form-group mb-3">
+                        <label class="form-label">Status</label>
+                        <select class="form-control" id="statusFilter">
+                            <option value="">All Statuses</option>
+                            <option value="open">Open</option>
+                            <option value="closed">Closed</option>
+                            <option value="archived">Archived</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Priority Filter -->
+                    <div class="form-group mb-3">
+                        <label class="form-label">Priority</label>
+                        <select class="form-control" id="priorityFilter">
+                            <option value="">All Priorities</option>
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                            <option value="urgent">Urgent</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Category Filter -->
+                    <div class="form-group mb-3">
+                        <label class="form-label">Category</label>
+                        <select class="form-control" id="categoryFilter">
+                            <option value="">All Categories</option>
+                            <option value="general">General Support</option>
+                            <option value="technical">Technical Issues</option>
+                            <option value="report">Report User</option>
+                            <option value="suggestion">Suggestions</option>
+                            <option value="appeal">Appeals</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Apply Filters -->
+                    <button class="btn btn-primary btn-block" onclick="applyTicketFilters()">
+                        Apply Filters
+                    </button>
+                    <button class="btn btn-outline-secondary btn-block mt-2" onclick="clearTicketFilters()">
+                        Clear All
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5>⚡ Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="quick-actions">
+                        <button class="btn btn-outline-primary btn-block mb-2" onclick="refreshTickets()">
+                            <i class="fas fa-sync-alt"></i> Refresh Tickets
+                        </button>
+                        <button class="btn btn-outline-secondary btn-block mb-2" data-modal-toggle="settingsModal">
+                            <i class="fas fa-cog"></i> Ticket Settings
+                        </button>
+                        <button class="btn btn-outline-info btn-block" data-modal-toggle="helpModal">
+                            <i class="fas fa-question-circle"></i> Help Guide
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tickets List -->
+        <div class="col-lg-9 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4>📋 Manor Support Tickets</h4>
+                    <div class="header-actions">
+                        <button class="btn btn-outline-primary btn-sm me-2" onclick="exportTickets()">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" 
+                                    type="button" data-bs-toggle="dropdown">
+                                Sort By
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" onclick="sortTickets('created_at')">Created Date</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="sortTickets('status')">Status</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="sortTickets('priority')">Priority</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="sortTickets('id')">Ticket ID</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if tickets %}
+                        <div class="tickets-list" id="tickets-list">
+                            {% for ticket in tickets %}
+                            <div class="ticket-item" data-ticket-id="{{ ticket.id }}" data-status="{{ ticket.status }}" data-priority="{{ ticket.priority }}">
+                                <div class="ticket-header">
+                                    <div class="ticket-id">
+                                        <span class="ticket-number">#{{ ticket.id }}</span>
+                                        <span class="ticket-status badge badge-{{ 'success' if ticket.status == 'open' else 'secondary' }}">
+                                            {{ ticket.status.title() }}
+                                        </span>
+                                        <span class="ticket-priority badge badge-{{ 'danger' if ticket.priority == 'urgent' else 'warning' if ticket.priority == 'high' else 'info' }}">
+                                            {{ ticket.priority.title() }}
+                                        </span>
+                                    </div>
+                                    <div class="ticket-date">
+                                        {{ ticket.created_at.strftime('%Y-%m-%d %H:%M') }}
+                                    </div>
+                                </div>
+                                
+                                <div class="ticket-content">
+                                    <div class="ticket-subject">
+                                        {{ ticket.subject or 'No subject provided' }}
+                                    </div>
+                                    <div class="ticket-meta">
+                                        <span class="creator">
+                                            <i class="fas fa-user"></i> 
+                                            {{ ticket.creator.username }}
+                                        </span>
+                                        {% if ticket.category %}
+                                        <span class="category">
+                                            <i class="fas fa-tag"></i> 
+                                            {{ ticket.category.title() }}
+                                        </span>
+                                        {% endif %}
+                                        {% if ticket.assigned_staff %}
+                                        <span class="assigned">
+                                            <i class="fas fa-user-shield"></i> 
+                                            Assigned
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="ticket-actions">
+                                    <button class="btn btn-sm btn-primary" onclick="viewTicket({{ ticket.id }})">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                    {% if ticket.status == 'open' %}
+                                    <button class="btn btn-sm btn-success" onclick="updateTicketStatus({{ ticket.id }}, 'closed')">
+                                        <i class="fas fa-check"></i> Close
+                                    </button>
+                                    {% endif %}
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                                                type="button" data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" href="#" onclick="assignTicket({{ ticket.id }})">
+                                                <i class="fas fa-user-plus"></i> Assign Staff
+                                            </a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="changePriority({{ ticket.id }})">
+                                                <i class="fas fa-exclamation-triangle"></i> Change Priority
+                                            </a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="addNote({{ ticket.id }})">
+                                                <i class="fas fa-sticky-note"></i> Add Note
+                                            </a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><a class="dropdown-item text-danger" href="#" onclick="deleteTicket({{ ticket.id }})">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Pagination -->
+                        <div class="pagination-container mt-4">
+                            <nav>
+                                <ul class="pagination justify-content-center">
+                                    <li class="page-item">
+                                        <a class="page-link" href="#" onclick="changePage(1)">First</a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="#" onclick="changePage('prev')">Previous</a>
+                                    </li>
+                                    <li class="page-item active">
+                                        <span class="page-link">1</span>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="#" onclick="changePage('next')">Next</a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="#" onclick="changePage('last')">Last</a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <div class="empty-icon">🎫</div>
+                            <div class="empty-title">No Support Tickets</div>
+                            <div class="empty-description">
+                                No tickets have been created yet. When users create support tickets, they will appear here.
+                            </div>
+                            <div class="mt-3">
+                                <button class="btn btn-outline-primary" onclick="refreshTickets()">
+                                    <i class="fas fa-sync-alt"></i> Refresh
+                                </button>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Ticket Details Modal -->
+<div class="modal fade" id="ticketModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content gothic-border">
+            <div class="modal-header">
+                <h5 class="modal-title">🎫 Ticket Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="ticket-details">
+                    <!-- Ticket details will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="saveTicketChanges()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ticket Settings Modal -->
+<div class="modal fade" id="settingsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content gothic-border">
+            <div class="modal-header">
+                <h5 class="modal-title">⚙️ Ticket System Settings</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="ticketSettingsForm">
+                    <div class="form-group">
+                        <label class="form-label">Ticket Category</label>
+                        <input type="text" class="form-control" name="ticket_category" 
+                               placeholder="Category ID for tickets">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Staff Channel</label>
+                        <input type="text" class="form-control" name="staff_channel" 
+                               placeholder="Channel ID for staff notifications">
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="tickets_enabled" id="ticketsEnabled" checked>
+                            <label class="form-check-label" for="ticketsEnabled">
+                                Enable Ticket System
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="auto_close" id="autoClose">
+                            <label class="form-check-label" for="autoClose">
+                                Auto-close inactive tickets after 7 days
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveTicketSettings()">Save Settings</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Help Modal -->
+<div class="modal fade" id="helpModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content gothic-border">
+            <div class="modal-header">
+                <h5 class="modal-title">❓ Ticket System Help</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="help-content">
+                    <h6>🎫 Managing Tickets</h6>
+                    <ul>
+                        <li>Click "View" to see full ticket details and conversation</li>
+                        <li>Use "Close" to mark tickets as resolved</li>
+                        <li>Assign staff members to specific tickets for tracking</li>
+                        <li>Change priority levels (Low, Medium, High, Urgent)</li>
+                    </ul>
+                    
+                    <h6>🔍 Filtering & Search</h6>
+                    <ul>
+                        <li>Search by ticket ID, subject, or creator name</li>
+                        <li>Filter by status, priority, or category</li>
+                        <li>Sort tickets by date, status, or priority</li>
+                    </ul>
+                    
+                    <h6>⚙️ Settings</h6>
+                    <ul>
+                        <li>Configure ticket category and staff notification channel</li>
+                        <li>Enable/disable the ticket system</li>
+                        <li>Set up auto-closing for inactive tickets</li>
+                    </ul>
+                    
+                    <h6>📊 Discord Commands</h6>
+                    <ul>
+                        <li><code>r!ticket [reason]</code> - Create a new ticket</li>
+                        <li><code>r!close [reason]</code> - Close current ticket</li>
+                        <li><code>r!tickets [status]</code> - List tickets (staff only)</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Ticket management functions
+let currentFilters = {};
+
+function applyTicketFilters() {
+    const status = document.getElementById('statusFilter').value;
+    const priority = document.getElementById('priorityFilter').value;
+    const category = document.getElementById('categoryFilter').value;
+    
+    currentFilters = { status, priority, category };
+    
+    const tickets = document.querySelectorAll('.ticket-item');
+    tickets.forEach(ticket => {
+        let visible = true;
+        
+        if (status && ticket.dataset.status !== status) visible = false;
+        if (priority && ticket.dataset.priority !== priority) visible = false;
+        if (category && !ticket.textContent.toLowerCase().includes(category.toLowerCase())) visible = false;
+        
+        ticket.style.display = visible ? 'block' : 'none';
+    });
+    
+    window.gothicDashboard.showNotification('Filters applied to Gothic tickets 🎫', 'info');
+}
+
+function clearTicketFilters() {
+    document.getElementById('statusFilter').value = '';
+    document.getElementById('priorityFilter').value = '';
+    document.getElementById('categoryFilter').value = '';
+    
+    const tickets = document.querySelectorAll('.ticket-item');
+    tickets.forEach(ticket => {
+        ticket.style.display = 'block';
+    });
+    
+    currentFilters = {};
+    window.gothicDashboard.showNotification('Filters cleared', 'info');
+}
+
+function refreshTickets() {
+    window.gothicDashboard.showLoading(true);
+    location.reload();
+}
+
+async function viewTicket(ticketId) {
+    try {
+        const response = await fetch(`/api/tickets/${ticketId}`);
+        const ticket = await response.json();
+        
+        if (ticket.success !== false) {
+            // Populate modal with ticket details
+            document.getElementById('ticket-details').innerHTML = `
+                <div class="ticket-detail-view">
+                    <div class="ticket-header-detail">
+                        <h5>Ticket #${ticket.id}</h5>
+                        <div class="badges">
+                            <span class="badge badge-${ticket.status === 'open' ? 'success' : 'secondary'}">${ticket.status}</span>
+                            <span class="badge badge-info">${ticket.priority}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="ticket-info">
+                        <div class="info-row">
+                            <strong>Creator:</strong> ${ticket.creator_name || 'Unknown'}
+                        </div>
+                        <div class="info-row">
+                            <strong>Subject:</strong> ${ticket.subject || 'No subject'}
+                        </div>
+                        <div class="info-row">
+                            <strong>Created:</strong> ${new Date(ticket.created_at).toLocaleString()}
+                        </div>
+                        ${ticket.category ? `<div class="info-row"><strong>Category:</strong> ${ticket.category}</div>` : ''}
+                        ${ticket.assigned_staff ? `<div class="info-row"><strong>Assigned:</strong> Staff Member</div>` : ''}
+                    </div>
+                    
+                    <div class="ticket-actions-detail mt-3">
+                        <button class="btn btn-outline-primary" onclick="assignTicket(${ticketId})">Assign Staff</button>
+                        <button class="btn btn-outline-warning" onclick="changePriority(${ticketId})">Change Priority</button>
+                        ${ticket.status === 'open' ? 
+                            `<button class="btn btn-success" onclick="updateTicketStatus(${ticketId}, 'closed')">Close Ticket</button>` :
+                            `<button class="btn btn-primary" onclick="updateTicketStatus(${ticketId}, 'open')">Reopen Ticket</button>`
+                        }
+                    </div>
+                </div>
+            `;
+            
+            new bootstrap.Modal(document.getElementById('ticketModal')).show();
+        } else {
+            window.gothicDashboard.showNotification('Failed to load ticket details', 'error');
+        }
+    } catch (error) {
+        console.error('Error viewing ticket:', error);
+        window.gothicDashboard.showNotification('Error loading ticket', 'error');
+    }
+}
+
+async function updateTicketStatus(ticketId, newStatus) {
+    try {
+        const response = await fetch(`/api/tickets/${ticketId}/status`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ status: newStatus })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            window.gothicDashboard.showNotification(result.message, 'success');
+            refreshTickets();
+        } else {
+            window.gothicDashboard.showNotification(result.error || 'Failed to update ticket', 'error');
+        }
+    } catch (error) {
+        console.error('Error updating ticket:', error);
+        window.gothicDashboard.showNotification('Error updating ticket status', 'error');
+    }
+}
+
+function assignTicket(ticketId) {
+    const staffMember = prompt('Enter staff member ID or username:');
+    if (staffMember) {
+        // Implementation would go here
+        window.gothicDashboard.showNotification(`Ticket #${ticketId} assigned to ${staffMember}`, 'info');
+    }
+}
+
+function changePriority(ticketId) {
+    const priority = prompt('Enter new priority (low, medium, high, urgent):');
+    if (priority && ['low', 'medium', 'high', 'urgent'].includes(priority.toLowerCase())) {
+        // Implementation would go here
+        window.gothicDashboard.showNotification(`Ticket #${ticketId} priority changed to ${priority}`, 'info');
+    }
+}
+
+function addNote(ticketId) {
+    const note = prompt('Enter internal note:');
+    if (note) {
+        // Implementation would go here
+        window.gothicDashboard.showNotification('Note added to ticket', 'success');
+    }
+}
+
+function deleteTicket(ticketId) {
+    if (confirm('Are you sure you want to delete this ticket? This action cannot be undone.')) {
+        // Implementation would go here
+        window.gothicDashboard.showNotification('Ticket deleted', 'success');
+        refreshTickets();
+    }
+}
+
+function sortTickets(field) {
+    const container = document.getElementById('tickets-list');
+    const tickets = Array.from(container.querySelectorAll('.ticket-item'));
+    
+    tickets.sort((a, b) => {
+        let aValue, bValue;
+        
+        switch (field) {
+            case 'created_at':
+                aValue = a.querySelector('.ticket-date').textContent;
+                bValue = b.querySelector('.ticket-date').textContent;
+                break;
+            case 'status':
+                aValue = a.dataset.status;
+                bValue = b.dataset.status;
+                break;
+            case 'priority':
+                const priorityOrder = { 'urgent': 4, 'high': 3, 'medium': 2, 'low': 1 };
+                aValue = priorityOrder[a.dataset.priority] || 0;
+                bValue = priorityOrder[b.dataset.priority] || 0;
+                return bValue - aValue; // Descending for priority
+            case 'id':
+                aValue = parseInt(a.dataset.ticketId);
+                bValue = parseInt(b.dataset.ticketId);
+                return bValue - aValue; // Descending for ID
+        }
+        
+        if (field !== 'priority' && field !== 'id') {
+            return aValue.localeCompare(bValue);
+        }
+        return 0;
+    });
+    
+    tickets.forEach(ticket => container.appendChild(ticket));
+    window.gothicDashboard.showNotification(`Tickets sorted by ${field}`, 'info');
+}
+
+function exportTickets() {
+    const tickets = Array.from(document.querySelectorAll('.ticket-item')).map(item => ({
+        id: item.dataset.ticketId,
+        status: item.dataset.status,
+        priority: item.dataset.priority,
+        subject: item.querySelector('.ticket-subject').textContent,
+        creator: item.querySelector('.creator').textContent.replace('👤 ', ''),
+        created: item.querySelector('.ticket-date').textContent
+    }));
+    
+    const csv = 'ID,Status,Priority,Subject,Creator,Created\n' +
+        tickets.map(t => `${t.id},"${t.status}","${t.priority}","${t.subject}","${t.creator}","${t.created}"`).join('\n');
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `gothic_tickets_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    
+    window.gothicDashboard.showNotification('Tickets exported successfully! 📜', 'success');
+}
+
+function changePage(page) {
+    // Pagination implementation would go here
+    window.gothicDashboard.showNotification(`Navigation to ${page} - feature coming soon`, 'info');
+}
+
+function saveTicketSettings() {
+    const form = document.getElementById('ticketSettingsForm');
+    const formData = new FormData(form);
+    
+    // Implementation would go here
+    window.gothicDashboard.showNotification('Ticket settings saved with Gothic precision! ⚙️', 'success');
+    bootstrap.Modal.getInstance(document.getElementById('settingsModal')).hide();
+}
+
+function saveTicketChanges() {
+    // Implementation would go here
+    window.gothicDashboard.showNotification('Ticket changes saved! 🎫', 'success');
+    bootstrap.Modal.getInstance(document.getElementById('ticketModal')).hide();
+}
+</script>
+{% endblock %}

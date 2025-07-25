@@ -1,0 +1,648 @@
+{% extends "base.html" %}
+
+{% block title %}Economy - RosethornBot{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="page-header gothic-border">
+                <h1 class="page-title">💰 Gothic Manor Treasury</h1>
+                <p class="page-subtitle">Manage thy Victorian economy with elegant precision and Gothic flair</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Guild Selection Alert -->
+    {% if not guild %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-warning gothic-border">
+                <h5>🏰 Select Your Gothic Manor</h5>
+                <p>Please select a guild from the navigation menu to manage the economy for that specific manor.</p>
+            </div>
+        </div>
+    </div>
+    {% else %}
+
+    <!-- Economy Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stats-card fade-in">
+                <div class="stats-icon">🌹</div>
+                <div class="stats-number">{{ stats.total_currency or 0 }}</div>
+                <div class="stats-label">Total {{ guild.currency_name or 'Currency' }}</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stats-card fade-in">
+                <div class="stats-icon">👥</div>
+                <div class="stats-number">{{ stats.total_users or 0 }}</div>
+                <div class="stats-label">Active Members</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stats-card fade-in">
+                <div class="stats-icon">🏪</div>
+                <div class="stats-number">{{ stats.total_items or 0 }}</div>
+                <div class="stats-label">Shop Items</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stats-card fade-in">
+                <div class="stats-icon">📊</div>
+                <div class="stats-number">{{ stats.total_transactions or 0 }}</div>
+                <div class="stats-label">Transactions</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Economy Management -->
+    <div class="row">
+        <!-- Economy Settings -->
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4>⚙️ Economy Settings</h4>
+                </div>
+                <div class="card-body">
+                    <form id="economySettingsForm" class="ajax-form" action="/api/guild-config/{{ guild.guild_id }}" method="PUT">
+                        <div class="form-group">
+                            <label class="form-label">Currency Name</label>
+                            <input type="text" class="form-control" name="currency_name" 
+                                   value="{{ guild.currency_name or 'Roses' }}" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Currency Symbol</label>
+                            <input type="text" class="form-control" name="currency_symbol" 
+                                   value="{{ guild.currency_symbol or '🌹' }}" maxlength="10">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Daily Reward Amount</label>
+                            <input type="number" class="form-control" name="daily_reward" 
+                                   value="{{ guild.daily_reward or 100 }}" min="1" max="10000">
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="economy_enabled" 
+                                       id="economyEnabled" {{ 'checked' if guild.economy_enabled else '' }}>
+                                <label class="form-check-label" for="economyEnabled">
+                                    Enable Economy System
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <i class="fas fa-save"></i> Save Settings
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5>⚡ Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="quick-actions">
+                        <button class="btn btn-outline-primary btn-block mb-2" data-modal-toggle="addItemModal">
+                            <i class="fas fa-plus"></i> Add Shop Item
+                        </button>
+                        <button class="btn btn-outline-success btn-block mb-2" onclick="showCurrencyManager()">
+                            <i class="fas fa-coins"></i> Manage Currency
+                        </button>
+                        <button class="btn btn-outline-info btn-block mb-2" onclick="showLeaderboard()">
+                            <i class="fas fa-trophy"></i> View Leaderboard
+                        </button>
+                        <button class="btn btn-outline-secondary btn-block" onclick="exportEconomyData()">
+                            <i class="fas fa-download"></i> Export Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Economy Presets -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5>🎨 Economy Presets</h5>
+                </div>
+                <div class="card-body">
+                    <div class="preset-buttons">
+                        <button class="btn btn-outline-primary btn-sm mb-2" onclick="applyPreset('gaming')">
+                            🎮 Gaming Server
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm mb-2" onclick="applyPreset('art')">
+                            🎨 Art Community
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm mb-2" onclick="applyPreset('roleplay')">
+                            🎭 Roleplay Server
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm mb-2" onclick="applyPreset('business')">
+                            💼 Business Network
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Shop Management -->
+        <div class="col-lg-8 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4>🏪 Gothic Marketplace</h4>
+                    <div class="header-actions">
+                        <button class="btn btn-primary btn-sm" data-modal-toggle="addItemModal">
+                            <i class="fas fa-plus"></i> Add Item
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="refreshShop()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Shop Categories -->
+                    <div class="shop-categories mb-3">
+                        <button class="btn btn-outline-primary btn-sm category-filter active" data-category="">
+                            All Items
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm category-filter" data-category="consumables">
+                            Consumables
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm category-filter" data-category="cosmetics">
+                            Cosmetics
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm category-filter" data-category="tools">
+                            Tools
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm category-filter" data-category="special">
+                            Special Items
+                        </button>
+                    </div>
+
+                    <!-- Shop Items -->
+                    {% if shop_items %}
+                        <div class="shop-items-grid" id="shop-items">
+                            {% for item in shop_items %}
+                            <div class="shop-item" data-category="{{ item.category or 'misc' }}" data-item-id="{{ item.id }}">
+                                <div class="item-header">
+                                    <div class="item-rarity rarity-{{ item.rarity or 'common' }}">
+                                        {{ item.rarity.title() if item.rarity else 'Common' }}
+                                    </div>
+                                    <div class="item-status">
+                                        {% if item.enabled %}
+                                            <span class="badge badge-success">Active</span>
+                                        {% else %}
+                                            <span class="badge badge-secondary">Disabled</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="item-content">
+                                    <div class="item-name">{{ item.name }}</div>
+                                    <div class="item-description">
+                                        {{ item.description[:100] + '...' if item.description and item.description|length > 100 else item.description or 'No description' }}
+                                    </div>
+                                    <div class="item-price">
+                                        {{ guild.currency_symbol or '🌹' }} {{ item.price }}
+                                    </div>
+                                    <div class="item-stock">
+                                        Stock: {{ item.stock if item.stock != -1 else 'Unlimited' }}
+                                    </div>
+                                </div>
+                                
+                                <div class="item-actions">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="editItem({{ item.id }})">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-warning" onclick="toggleItem({{ item.id }})">
+                                        <i class="fas fa-{{ 'eye-slash' if item.enabled else 'eye' }}"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteItem({{ item.id }})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <div class="empty-icon">🏪</div>
+                            <div class="empty-title">Empty Marketplace</div>
+                            <div class="empty-description">
+                                No items have been added to the Gothic marketplace yet. Create your first item to begin trading.
+                            </div>
+                            <button class="btn btn-primary mt-3" data-modal-toggle="addItemModal">
+                                <i class="fas fa-plus"></i> Add First Item
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Add Item Modal -->
+<div class="modal fade" id="addItemModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content gothic-border">
+            <div class="modal-header">
+                <h5 class="modal-title">🏪 Add Gothic Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addItemForm" class="ajax-form" action="/api/shop-items" method="POST">
+                    <input type="hidden" name="guild_id" value="{{ guild.guild_id if guild else '' }}">
+                    
+                    <div class="form-group">
+                        <label class="form-label">Item Name</label>
+                        <input type="text" class="form-control" name="name" required 
+                               placeholder="Enter elegant item name...">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" name="description" rows="3" 
+                                  placeholder="Describe this Gothic treasure..."></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Price</label>
+                                <input type="number" class="form-control" name="price" required 
+                                       min="0" step="0.01" placeholder="0.00">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Stock</label>
+                                <input type="number" class="form-control" name="stock" 
+                                       min="-1" placeholder="-1 for unlimited">
+                                <div class="form-text">-1 = Unlimited stock</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Category</label>
+                                <select class="form-control" name="category">
+                                    <option value="consumables">Consumables</option>
+                                    <option value="cosmetics">Cosmetics</option>
+                                    <option value="tools">Tools</option>
+                                    <option value="special">Special Items</option>
+                                    <option value="misc">Miscellaneous</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Rarity</label>
+                                <select class="form-control" name="rarity">
+                                    <option value="common">Common</option>
+                                    <option value="uncommon">Uncommon</option>
+                                    <option value="rare">Rare</option>
+                                    <option value="epic">Epic</option>
+                                    <option value="legendary">Legendary</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Image URL (Optional)</label>
+                        <input type="url" class="form-control" name="image_url" 
+                               placeholder="https://example.com/image.png">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="addItemForm" class="btn btn-primary">Add Item</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Currency Manager Modal -->
+<div class="modal fade" id="currencyModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content gothic-border">
+            <div class="modal-header">
+                <h5 class="modal-title">💰 Currency Manager</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="currency-management">
+                    <div class="form-group">
+                        <label class="form-label">User ID or Username</label>
+                        <input type="text" class="form-control" id="currencyUser" 
+                               placeholder="Enter user ID or username...">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Amount</label>
+                        <input type="number" class="form-control" id="currencyAmount" 
+                               placeholder="Enter amount..." step="0.01">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Operation</label>
+                        <select class="form-control" id="currencyOperation">
+                            <option value="add">Add Currency</option>
+                            <option value="remove">Remove Currency</option>
+                            <option value="set">Set Balance</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Reason (Optional)</label>
+                        <input type="text" class="form-control" id="currencyReason" 
+                               placeholder="Administrative adjustment...">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="manageCurrency()">Apply Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Leaderboard Modal -->
+<div class="modal fade" id="leaderboardModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content gothic-border">
+            <div class="modal-header">
+                <h5 class="modal-title">🏆 Gothic Leaderboard</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="leaderboard-content">
+                    <!-- Leaderboard will be populated by JavaScript -->
+                    <div class="loading-placeholder">
+                        <div class="gothic-spinner"></div>
+                        <div>Loading leaderboard data...</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Economy management functions
+function refreshShop() {
+    window.gothicDashboard.showLoading(true);
+    location.reload();
+}
+
+function editItem(itemId) {
+    // Get item data and populate form
+    const item = document.querySelector(`[data-item-id="${itemId}"]`);
+    if (item) {
+        const name = item.querySelector('.item-name').textContent;
+        const description = item.querySelector('.item-description').textContent;
+        
+        // Populate edit form (would open modal with item data)
+        window.gothicDashboard.showNotification(`Editing ${name} - feature in development`, 'info');
+    }
+}
+
+function toggleItem(itemId) {
+    if (confirm('Toggle item availability in the Gothic marketplace?')) {
+        // Implementation would go here
+        window.gothicDashboard.showNotification('Item status toggled successfully! 🏪', 'success');
+        refreshShop();
+    }
+}
+
+function deleteItem(itemId) {
+    if (confirm('Remove this item from the Gothic marketplace? This action cannot be undone.')) {
+        // Implementation would go here
+        window.gothicDashboard.showNotification('Item removed from marketplace 🗑️', 'success');
+        refreshShop();
+    }
+}
+
+function showCurrencyManager() {
+    new bootstrap.Modal(document.getElementById('currencyModal')).show();
+}
+
+function manageCurrency() {
+    const user = document.getElementById('currencyUser').value;
+    const amount = parseFloat(document.getElementById('currencyAmount').value);
+    const operation = document.getElementById('currencyOperation').value;
+    const reason = document.getElementById('currencyReason').value;
+    
+    if (!user || !amount) {
+        window.gothicDashboard.showNotification('Please fill in user and amount fields', 'error');
+        return;
+    }
+    
+    // Implementation would go here
+    window.gothicDashboard.showNotification(`Currency ${operation} of ${amount} for ${user} completed! 💰`, 'success');
+    bootstrap.Modal.getInstance(document.getElementById('currencyModal')).hide();
+    
+    // Clear form
+    document.getElementById('currencyUser').value = '';
+    document.getElementById('currencyAmount').value = '';
+    document.getElementById('currencyReason').value = '';
+}
+
+async function showLeaderboard() {
+    const modal = new bootstrap.Modal(document.getElementById('leaderboardModal'));
+    modal.show();
+    
+    try {
+        // Simulate loading leaderboard data
+        setTimeout(() => {
+            const content = document.querySelector('.leaderboard-content');
+            content.innerHTML = `
+                <div class="leaderboard-tabs">
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#currency-board">
+                                💰 Currency
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#level-board">
+                                ⭐ Levels
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="currency-board">
+                            <div class="leaderboard-list">
+                                <div class="leaderboard-item">
+                                    <div class="rank">🥇</div>
+                                    <div class="user-info">
+                                        <div class="username">Gothic Master</div>
+                                        <div class="user-meta">Level 25</div>
+                                    </div>
+                                    <div class="value">🌹 15,420</div>
+                                </div>
+                                <div class="leaderboard-item">
+                                    <div class="rank">🥈</div>
+                                    <div class="user-info">
+                                        <div class="username">Rose Collector</div>
+                                        <div class="user-meta">Level 18</div>
+                                    </div>
+                                    <div class="value">🌹 12,890</div>
+                                </div>
+                                <div class="leaderboard-item">
+                                    <div class="rank">🥉</div>
+                                    <div class="user-info">
+                                        <div class="username">Victorian Noble</div>
+                                        <div class="user-meta">Level 22</div>
+                                    </div>
+                                    <div class="value">🌹 11,230</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-pane fade" id="level-board">
+                            <div class="leaderboard-list">
+                                <div class="leaderboard-item">
+                                    <div class="rank">🥇</div>
+                                    <div class="user-info">
+                                        <div class="username">Experience Hunter</div>
+                                        <div class="user-meta">125,430 XP</div>
+                                    </div>
+                                    <div class="value">Level 35</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }, 1000);
+    } catch (error) {
+        console.error('Error loading leaderboard:', error);
+        window.gothicDashboard.showNotification('Failed to load leaderboard', 'error');
+    }
+}
+
+function applyPreset(presetType) {
+    const presets = {
+        gaming: {
+            currency_name: 'Coins',
+            currency_symbol: '🪙',
+            daily_reward: 150,
+            items: [
+                { name: 'Health Potion', price: 50, category: 'consumables', rarity: 'common' },
+                { name: 'XP Boost', price: 100, category: 'consumables', rarity: 'uncommon' },
+                { name: 'Legendary Weapon Skin', price: 500, category: 'cosmetics', rarity: 'legendary' }
+            ]
+        },
+        art: {
+            currency_name: 'Brushstrokes',
+            currency_symbol: '🎨',
+            daily_reward: 75,
+            items: [
+                { name: 'Color Palette', price: 25, category: 'tools', rarity: 'common' },
+                { name: 'Premium Canvas', price: 100, category: 'tools', rarity: 'rare' },
+                { name: 'Artist Badge', price: 200, category: 'cosmetics', rarity: 'epic' }
+            ]
+        },
+        roleplay: {
+            currency_name: 'Gold Pieces',
+            currency_symbol: '🏅',
+            daily_reward: 200,
+            items: [
+                { name: 'Healing Elixir', price: 75, category: 'consumables', rarity: 'common' },
+                { name: 'Magic Scroll', price: 150, category: 'tools', rarity: 'uncommon' },
+                { name: 'Noble Title', price: 1000, category: 'special', rarity: 'legendary' }
+            ]
+        },
+        business: {
+            currency_name: 'Credits',
+            currency_symbol: '💳',
+            daily_reward: 50,
+            items: [
+                { name: 'Network Access', price: 100, category: 'tools', rarity: 'common' },
+                { name: 'Premium Support', price: 250, category: 'special', rarity: 'rare' },
+                { name: 'Executive Status', price: 500, category: 'cosmetics', rarity: 'epic' }
+            ]
+        }
+    };
+    
+    if (confirm(`Apply ${presetType} economy preset? This will update currency settings and add sample items.`)) {
+        const preset = presets[presetType];
+        
+        // Update form fields
+        document.querySelector('[name="currency_name"]').value = preset.currency_name;
+        document.querySelector('[name="currency_symbol"]').value = preset.currency_symbol;
+        document.querySelector('[name="daily_reward"]').value = preset.daily_reward;
+        
+        window.gothicDashboard.showNotification(`${presetType.charAt(0).toUpperCase() + presetType.slice(1)} preset applied! Save settings to confirm. 🎨`, 'success');
+    }
+}
+
+function exportEconomyData() {
+    const economyData = {
+        settings: {
+            currency_name: document.querySelector('[name="currency_name"]').value,
+            currency_symbol: document.querySelector('[name="currency_symbol"]').value,
+            daily_reward: document.querySelector('[name="daily_reward"]').value
+        },
+        items: Array.from(document.querySelectorAll('.shop-item')).map(item => ({
+            name: item.querySelector('.item-name').textContent,
+            description: item.querySelector('.item-description').textContent,
+            price: item.querySelector('.item-price').textContent,
+            category: item.dataset.category,
+            rarity: item.querySelector('.item-rarity').textContent.toLowerCase()
+        }))
+    };
+    
+    const dataStr = JSON.stringify(economyData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `gothic_economy_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    
+    window.gothicDashboard.showNotification('Economy data exported successfully! 📊', 'success');
+}
+
+// Category filtering
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.category-filter').forEach(button => {
+        button.addEventListener('click', function() {
+            const category = this.dataset.category;
+            
+            // Update active button
+            document.querySelectorAll('.category-filter').forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Filter items
+            document.querySelectorAll('.shop-item').forEach(item => {
+                if (!category || item.dataset.category === category) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - RosethornBot Gothic Manor</title>
+    
+    <!-- Google Fonts for Gothic Victorian Typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cinzel+Decorative:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Custom Gothic CSS -->
+    <link href="{{ url_for('static', filename='css/gothic.css') }}" rel="stylesheet">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌹</text></svg>">
+    
+    <style>
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--gothic-black) 0%, var(--dark-grey) 50%, var(--gothic-black) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        .login-container {
+            width: 100%;
+            max-width: 500px;
+            padding: 2rem;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .login-card {
+            background: linear-gradient(145deg, var(--dark-grey) 0%, var(--gothic-black) 100%);
+            border: 3px solid var(--primary-red);
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            box-shadow: 0 20px 40px var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(113, 20, 23, 0.1), transparent);
+            animation: shimmer 3s infinite;
+            pointer-events: none;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .login-title {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: 2.5rem;
+            color: var(--primary-red);
+            text-shadow: 2px 2px 4px var(--shadow);
+            margin-bottom: 0.5rem;
+        }
+        
+        .login-subtitle {
+            color: var(--cream);
+            font-style: italic;
+            opacity: 0.9;
+        }
+        
+        .login-icon {
+            font-size: 4rem;
+            color: var(--primary-red);
+            margin-bottom: 1rem;
+            display: block;
+            text-shadow: 0 0 20px rgba(113, 20, 23, 0.5);
+        }
+        
+        .discord-login-btn {
+            background: linear-gradient(45deg, #5865f2 0%, #4752c4 100%);
+            border: none;
+            color: white;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 15px;
+            width: 100%;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .discord-login-btn:hover {
+            background: linear-gradient(45deg, #4752c4 0%, #3c45a3 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(88, 101, 242, 0.3);
+            color: white;
+        }
+        
+        .discord-icon {
+            font-size: 1.5rem;
+        }
+        
+        .demo-login {
+            background: linear-gradient(45deg, var(--primary-red) 0%, var(--light-red) 100%);
+            border: 2px solid var(--primary-red);
+            color: var(--cream);
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            border-radius: 10px;
+            width: 100%;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .demo-login:hover {
+            background: linear-gradient(45deg, var(--light-red) 0%, var(--primary-red) 100%);
+            border-color: var(--gold);
+            color: var(--gold);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px var(--shadow);
+        }
+        
+        .login-info {
+            background: rgba(113, 20, 23, 0.1);
+            border: 1px solid var(--primary-red);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+        
+        .login-info h6 {
+            color: var(--gold);
+            margin-bottom: 0.5rem;
+        }
+        
+        .login-info p {
+            color: var(--cream);
+            margin: 0;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        .features-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 1rem;
+        }
+        
+        .features-list li {
+            color: var(--cream);
+            margin-bottom: 0.3rem;
+            font-size: 0.9rem;
+        }
+        
+        .features-list li::before {
+            content: '🌹';
+            margin-right: 0.5rem;
+        }
+        
+        .gothic-decorations {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .decoration {
+            position: absolute;
+            font-size: 2rem;
+            opacity: 0.1;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .decoration:nth-child(1) { top: 10%; left: 10%; animation-delay: 0s; }
+        .decoration:nth-child(2) { top: 20%; right: 15%; animation-delay: 1s; }
+        .decoration:nth-child(3) { bottom: 30%; left: 5%; animation-delay: 2s; }
+        .decoration:nth-child(4) { bottom: 10%; right: 10%; animation-delay: 3s; }
+        .decoration:nth-child(5) { top: 50%; left: 2%; animation-delay: 4s; }
+        .decoration:nth-child(6) { top: 60%; right: 3%; animation-delay: 5s; }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+        
+        .background-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(113, 20, 23, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(113, 20, 23, 0.1) 0%, transparent 50%);
+            animation: backgroundShift 20s ease-in-out infinite;
+            z-index: 1;
+        }
+        
+        @keyframes backgroundShift {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.1; }
+        }
+        
+        .version-info {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            color: var(--light-grey);
+            font-size: 0.8rem;
+            font-style: italic;
+            z-index: 5;
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Pattern -->
+    <div class="background-pattern"></div>
+    
+    <!-- Gothic Decorations -->
+    <div class="gothic-decorations">
+        <div class="decoration">🌹</div>
+        <div class="decoration">🕯️</div>
+        <div class="decoration">🌙</div>
+        <div class="decoration">⭐</div>
+        <div class="decoration">🗝️</div>
+        <div class="decoration">👑</div>
+    </div>
+    
+    <!-- Login Container -->
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <span class="login-icon">🏰</span>
+                <h1 class="login-title">RosethornBot</h1>
+                <p class="login-subtitle">Enter the Gothic Victorian Manor</p>
+            </div>
+            
+            <div class="login-content">
+                <!-- Discord OAuth Login -->
+                <a href="{{ url_for('discord_auth') }}" class="discord-login-btn">
+                    <i class="fab fa-discord discord-icon"></i>
+                    <span>Login with Discord</span>
+                </a>
+                
+                <!-- Demo Login (for development) -->
+                <a href="{{ url_for('discord_auth', discord_id='123456789', username='DemoUser') }}" class="demo-login">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Demo Login</span>
+                </a>
+                
+                <!-- Login Information -->
+                <div class="login-info">
+                    <h6>🌹 Welcome to the Gothic Manor</h6>
+                    <p>
+                        Connect thy Discord account to access the RosethornBot dashboard and manage thy Victorian server with elegant precision.
+                    </p>
+                    
+                    <ul class="features-list">
+                        <li>Command creation and management</li>
+                        <li>Ticket system administration</li>
+                        <li>Economy and marketplace control</li>
+                        <li>Social media monitoring</li>
+                        <li>Real-time analytics and insights</li>
+                        <li>Victorian Gothic theming</li>
+                    </ul>
+                    
+                    <p class="mt-2">
+                        <small>
+                            <i class="fas fa-shield-alt"></i>
+                            Thy Discord information remains secure and is used only for authentication and server management.
+                        </small>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Version Info -->
+    <div class="version-info">
+        RosethornBot v2.0.0 - Gothic Victorian Excellence
+    </div>
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Add some interactive effects
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate login card on load
+            const loginCard = document.querySelector('.login-card');
+            loginCard.style.opacity = '0';
+            loginCard.style.transform = 'translateY(30px)';
+            
+            setTimeout(() => {
+                loginCard.style.transition = 'all 0.8s ease';
+                loginCard.style.opacity = '1';
+                loginCard.style.transform = 'translateY(0)';
+            }, 100);
+            
+            // Add hover effect to decorations
+            const decorations = document.querySelectorAll('.decoration');
+            decorations.forEach((decoration, index) => {
+                decoration.addEventListener('mouseenter', function() {
+                    this.style.opacity = '0.3';
+                    this.style.transform = 'scale(1.2)';
+                    this.style.transition = 'all 0.3s ease';
+                });
+                
+                decoration.addEventListener('mouseleave', function() {
+                    this.style.opacity = '0.1';
+                    this.style.transform = 'scale(1)';
+                });
+            });
+            
+            // Add typing effect to subtitle
+            const subtitle = document.querySelector('.login-subtitle');
+            const originalText = subtitle.textContent;
+            subtitle.textContent = '';
+            
+            let i = 0;
+            const typeWriter = () => {
+                if (i < originalText.length) {
+                    subtitle.textContent += originalText.charAt(i);
+                    i++;
+                    setTimeout(typeWriter, 100);
+                }
+            };
+            
+            setTimeout(typeWriter, 1000);
+            
+            // Add sparkle effect on login button hover
+            const discordBtn = document.querySelector('.discord-login-btn');
+            discordBtn.addEventListener('mouseenter', function() {
+                this.style.boxShadow = '0 8px 16px rgba(88, 101, 242, 0.3), 0 0 20px rgba(88, 101, 242, 0.2)';
+            });
+            
+            discordBtn.addEventListener('mouseleave', function() {
+                this.style.boxShadow = '';
+            });
+        });
+        
+        // Handle flash messages
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                document.addEventListener('DOMContentLoaded', function() {
+                    {% for category, message in messages %}
+                        showNotification('{{ message }}', '{{ category }}');
+                    {% endfor %}
+                });
+            {% endif %}
+        {% endwith %}
+        
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type} position-fixed`;
+            notification.style.cssText = `
+                top: 20px;
+                right: 20px;
+                z-index: 9999;
+                min-width: 300px;
+                animation: slideIn 0.3s ease;
+            `;
+            
+            const icons = {
+                success: '✅',
+                error: '❌',
+                warning: '⚠️',
+                info: '🌹'
+            };
+            
+            notification.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <span class="me-2">${icons[type] || icons.info}</span>
+                    <span>${message}</span>
+                    <button type="button" class="btn-close ms-auto" onclick="this.parentElement.parentElement.remove()"></button>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(() => notification.remove(), 300);
+                }
+            }, 5000);
+        }
+        
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

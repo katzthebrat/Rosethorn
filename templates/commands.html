@@ -1,0 +1,340 @@
+{% extends "base.html" %}
+
+{% block title %}Commands - RosethornBot{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('static', filename='js/command-editor.js') }}" rel="preload" as="script">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="page-header gothic-border">
+                <h1 class="page-title">📜 Gothic Command Scriptorium</h1>
+                <p class="page-subtitle">Craft elegant commands with Victorian precision and Gothic flair</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Guild Selection Alert -->
+    {% if not guild %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-warning gothic-border">
+                <h5>🏰 Select Your Gothic Manor</h5>
+                <p>Please select a guild from the navigation menu to manage commands for that specific manor.</p>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    
+    <!-- Command Management Interface -->
+    <div class="row">
+        <!-- Commands List -->
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4>📋 Manor Commands</h4>
+                    <button class="btn btn-primary btn-sm btn-new-command">
+                        <i class="fas fa-plus"></i> New
+                    </button>
+                </div>
+                <div class="card-body">
+                    <!-- Search Commands -->
+                    <div class="form-group mb-3">
+                        <input type="text" class="form-control search-input" 
+                               data-search-type="commands" 
+                               placeholder="🔍 Search Gothic commands...">
+                    </div>
+                    
+                    <!-- Commands List -->
+                    <div class="commands-list" id="commands-list">
+                        {% if commands %}
+                            {% for command in commands %}
+                            <div class="command-item" data-command-id="{{ command.id }}">
+                                <div class="command-info">
+                                    <div class="command-name">{{ command.name }}</div>
+                                    <div class="command-meta">
+                                        <span class="usage-count">{{ command.uses }} uses</span>
+                                        <span class="separator">•</span>
+                                        <span class="last-updated">{{ command.updated_at.strftime('%m/%d') }}</span>
+                                        {% if not command.enabled %}
+                                            <span class="badge badge-secondary ms-1">Disabled</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="command-actions">
+                                    <button class="btn btn-sm btn-outline-primary btn-duplicate-command" 
+                                            data-command-id="{{ command.id }}" 
+                                            title="Duplicate Command">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger btn-delete-command" 
+                                            data-command-id="{{ command.id }}"
+                                            title="Delete Command">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="empty-state">
+                                <div class="empty-icon">📜</div>
+                                <div class="empty-title">No Commands Found</div>
+                                <div class="empty-description">Create your first Gothic command to begin</div>
+                                <button class="btn btn-primary mt-3 btn-new-command">Create Command</button>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Search Results -->
+                    <div class="search-results" data-search-results="commands" style="display: none;"></div>
+                </div>
+            </div>
+            
+            <!-- Command Management Tools -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5>🔧 Management Tools</h5>
+                </div>
+                <div class="card-body">
+                    <div class="tool-buttons">
+                        <button class="btn btn-outline-primary btn-block mb-2 btn-export-commands">
+                            <i class="fas fa-download"></i> Export Commands
+                        </button>
+                        <button class="btn btn-outline-primary btn-block mb-2 btn-import-commands">
+                            <i class="fas fa-upload"></i> Import Commands
+                        </button>
+                        <button class="btn btn-outline-secondary btn-block" onclick="location.reload()">
+                            <i class="fas fa-sync-alt"></i> Refresh List
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Command Editor -->
+        <div class="col-lg-8 mb-4">
+            <div class="command-editor-container">
+                <!-- Command Info Form -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h4>✏️ Command Editor</h4>
+                    </div>
+                    <div class="card-body">
+                        <form id="commandForm" class="ajax-form" action="/api/commands" method="POST" data-reset-on-success="false">
+                            <input type="hidden" name="guild_id" value="{{ guild.guild_id }}">
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Command Name</label>
+                                        <input type="text" class="form-control" name="command_name" 
+                                               placeholder="Enter command name..." required>
+                                        <div class="form-text">Use letters, numbers, and underscores only</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Template</label>
+                                        <select class="form-control template-selector">
+                                            <option value="">Select a template...</option>
+                                            <!-- Templates will be populated by JavaScript -->
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Command Content</label>
+                                <div class="editor-wrapper">
+                                    <textarea class="form-control command-editor" name="command_content" 
+                                              rows="8" placeholder="Enter your Gothic command content..."
+                                              maxlength="2000"></textarea>
+                                    <div class="character-count">0/2000</div>
+                                </div>
+                                <div class="form-text">Use {user}, {guild}, {channel} for dynamic values</div>
+                            </div>
+                            
+                            <div class="editor-toolbar">
+                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.execCommand('bold')">
+                                    <i class="fas fa-bold"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.execCommand('italic')">
+                                    <i class="fas fa-italic"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.execCommand('underline')">
+                                    <i class="fas fa-underline"></i>
+                                </button>
+                                <div class="separator"></div>
+                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="insertAtCursor('{user}')">
+                                    👤 User
+                                </button>
+                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="insertAtCursor('{guild}')">
+                                    🏰 Guild
+                                </button>
+                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="insertAtCursor('🌹')">
+                                    🌹 Rose
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Embed Editor -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h4>🎨 Gothic Embed Designer</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="embed-editor">
+                                    <!-- Embed form will be populated by JavaScript -->
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="embed-preview-container">
+                                    <h5>📱 Discord Preview</h5>
+                                    <div class="embed-preview">
+                                        <div class="preview-placeholder">
+                                            <div class="placeholder-icon">🌹</div>
+                                            <div class="placeholder-text">Embed preview will appear here</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Save Actions -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="save-status">
+                                <span class="autosave-indicator" style="opacity: 0;">Auto-saved</span>
+                            </div>
+                            <div class="save-actions">
+                                <button type="button" class="btn btn-outline-secondary me-2" onclick="window.gothicCommandEditor.createNewCommand()">
+                                    <i class="fas fa-file"></i> New Command
+                                </button>
+                                <button type="button" class="btn btn-success btn-save-command">
+                                    <i class="fas fa-save"></i> Save Gothic Command
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Command Variables Reference Modal -->
+<div class="modal fade" id="variablesModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content gothic-border">
+            <div class="modal-header">
+                <h5 class="modal-title">📜 Gothic Variables Reference</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="variables-reference">
+                    <h6>User Variables</h6>
+                    <div class="variable-list">
+                        <div class="variable-item">
+                            <code>{user}</code> - User mention (@username)
+                        </div>
+                        <div class="variable-item">
+                            <code>{user.name}</code> - Username only
+                        </div>
+                        <div class="variable-item">
+                            <code>{user.id}</code> - User ID
+                        </div>
+                    </div>
+                    
+                    <h6>Guild Variables</h6>
+                    <div class="variable-list">
+                        <div class="variable-item">
+                            <code>{guild}</code> - Guild name
+                        </div>
+                        <div class="variable-item">
+                            <code>{guild.members}</code> - Member count
+                        </div>
+                        <div class="variable-item">
+                            <code>{guild.owner}</code> - Guild owner
+                        </div>
+                    </div>
+                    
+                    <h6>Channel Variables</h6>
+                    <div class="variable-list">
+                        <div class="variable-item">
+                            <code>{channel}</code> - Channel mention
+                        </div>
+                        <div class="variable-item">
+                            <code>{channel.name}</code> - Channel name
+                        </div>
+                    </div>
+                    
+                    <h6>Date/Time Variables</h6>
+                    <div class="variable-list">
+                        <div class="variable-item">
+                            <code>{date}</code> - Current date
+                        </div>
+                        <div class="variable-item">
+                            <code>{time}</code> - Current time
+                        </div>
+                        <div class="variable-item">
+                            <code>{datetime}</code> - Date and time
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/command-editor.js') }}"></script>
+<script>
+function insertAtCursor(text) {
+    const editor = document.querySelector('.command-editor');
+    if (editor) {
+        const start = editor.selectionStart;
+        const end = editor.selectionEnd;
+        const value = editor.value;
+        
+        editor.value = value.substring(0, start) + text + value.substring(end);
+        editor.selectionStart = editor.selectionEnd = start + text.length;
+        editor.focus();
+        
+        // Trigger change event
+        const event = new Event('input', { bubbles: true });
+        editor.dispatchEvent(event);
+    }
+}
+
+// Help button
+document.addEventListener('DOMContentLoaded', function() {
+    // Add help button to toolbar
+    const toolbar = document.querySelector('.editor-toolbar');
+    if (toolbar) {
+        const helpButton = document.createElement('button');
+        helpButton.type = 'button';
+        helpButton.className = 'btn btn-outline-info btn-sm ms-auto';
+        helpButton.innerHTML = '<i class="fas fa-question-circle"></i> Variables';
+        helpButton.setAttribute('data-bs-toggle', 'modal');
+        helpButton.setAttribute('data-bs-target', '#variablesModal');
+        toolbar.appendChild(helpButton);
+    }
+});
+</script>
+{% endblock %}
